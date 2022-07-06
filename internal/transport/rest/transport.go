@@ -1,4 +1,4 @@
-package transport
+package rest
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -6,26 +6,20 @@ import (
 )
 
 type Handler struct {
-	dictHandler *DictionaryHandler
+	DictHandler *DictionaryHandler
 }
 
 type HandlerConfig struct {
-	dictService Dictionary
+	DictService DictionaryService
 }
 
-func CreateHandlers(cfg HandlerConfig) *Handler {
+func NewHandlers(cfg *HandlerConfig) *Handler {
 	return &Handler{
-		dictHandler: NewDictionaryHandler(cfg.dictService),
+		DictHandler: NewDictionaryHandler(cfg.DictService),
 	}
 }
 
-func (h *Handler) InitRoutes() *fiber.App {
-	router := fiber.New()
-
-	api := router.Group("/api", logger.New())
-	{
-		api.Get("/:source/:num", h.dictHandler.GetWords)
-	}
-
-	return router
+func (h *Handler) InitRoutes(app *fiber.App) {
+	api := app.Group("/api", logger.New())
+	api.Get("/:source/:limit/:offset", h.DictHandler.GetWords)
 }

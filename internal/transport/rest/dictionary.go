@@ -1,26 +1,38 @@
-package transport
+package rest
 
 import (
+	"strconv"
+
 	"github.com/DwarfWizzard/practice-dictionary/internal/domain"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type Dictionary interface {
-	GetWords() ([]domain.Word, error)
+type DictionaryService interface {
+	GetWords(source string, offset, limit int) ([]domain.Word, error)
 }
 
 type DictionaryHandler struct {
-	dictService Dictionary
+	DictService DictionaryService
 }
 
-func NewDictionaryHandler(dictService Dictionary) *DictionaryHandler {
+func NewDictionaryHandler(dictService DictionaryService) *DictionaryHandler {
 	return &DictionaryHandler{
-		dictService: dictService,
+		DictService: dictService,
 	}
 }
 
-func (d *DictionaryHandler) GetWords(c *fiber.Ctx) error{
-	return nil
-}
+func (d *DictionaryHandler) GetWords(c *fiber.Ctx) error {
+	source := c.Params("source")
+	offset, _ := strconv.Atoi(c.Params("offset"))
+	limit, _ := strconv.Atoi(c.Params("limit"))
 
+	words, err := d.DictService.GetWords(source, offset, limit)
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(words)
+}
