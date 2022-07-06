@@ -9,7 +9,7 @@ import (
 )
 
 type DictionaryService interface {
-	GetWords(source string, offset, limit int) ([]domain.Word, error)
+	GetWords(source *string, offset, limit *int) ([]domain.Word, error)
 }
 
 type DictionaryHandler struct {
@@ -27,7 +27,7 @@ func (d *DictionaryHandler) GetWords(c *fiber.Ctx) error {
 	offset, _ := strconv.Atoi(c.Params("offset"))
 	limit, _ := strconv.Atoi(c.Params("limit"))
 
-	words, err := d.DictService.GetWords(source, offset, limit)
+	words, err := d.DictService.GetWords(&source, &offset, &limit)
 	if err != nil {
 		c.Status(fiber.StatusInternalServerError)
 		return c.JSON(map[string]interface{}{

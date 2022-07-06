@@ -13,10 +13,14 @@ func NewDictionaryMock() *DictionaryMock {
 	return &DictionaryMock{}
 }
 
-func (s *DictionaryMock) GetWords(source string, offset, limit int) ([]domain.Word, error) {
+func (s *DictionaryMock) GetWords(source *string, offset, limit *int) ([]domain.Word, error) {
 	var words []domain.Word
 
-	rand.Seed(int64(offset))
+	var seed int64
+	for _, r := range *source {
+		seed += int64(r)
+	}
+	rand.Seed(seed+int64(*offset))
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
     "abcdefghijklmnopqrstuvwxyzåäö" +
@@ -25,7 +29,7 @@ func (s *DictionaryMock) GetWords(source string, offset, limit int) ([]domain.Wo
 	var original strings.Builder
 	var translation strings.Builder
 
-	for i := 0; i < limit; i++ {
+	for i := 0; i < *limit; i++ {
 		var word domain.Word
 
 		for j := 0; j<5; j++ {
