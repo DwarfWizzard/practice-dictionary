@@ -7,7 +7,7 @@ import (
 	"github.com/DwarfWizzard/practice-dictionary/internal/domain"
 )
 
-type DictionaryMock struct {}
+type DictionaryMock struct{}
 
 func NewDictionaryMock() *DictionaryMock {
 	return &DictionaryMock{}
@@ -20,11 +20,11 @@ func (s *DictionaryMock) GetWords(source *string, offset, limit *int) ([]domain.
 	for _, r := range *source {
 		seed += int64(r)
 	}
-	rand.Seed(seed+int64(*offset))
+	rand.Seed(seed + int64(*offset))
 
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
-    "abcdefghijklmnopqrstuvwxyzåäö" +
-    "0123456789")
+		"abcdefghijklmnopqrstuvwxyzåäö" +
+		"0123456789")
 
 	var original strings.Builder
 	var translation strings.Builder
@@ -32,11 +32,12 @@ func (s *DictionaryMock) GetWords(source *string, offset, limit *int) ([]domain.
 	for i := 0; i < *limit; i++ {
 		var word domain.Word
 
-		for j := 0; j<5; j++ {
+		for j := 0; j < 5; j++ {
 			original.WriteRune(chars[rand.Intn(len(chars))])
 			translation.WriteRune(chars[rand.Intn(len(chars))])
 		}
 
+		word.Id = i + *offset
 		word.Original = original.String()
 		word.Translation = translation.String()
 
