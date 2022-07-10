@@ -5,19 +5,24 @@ import (
 
 	dictionary "github.com/DwarfWizzard/practice-dictionary"
 	"github.com/DwarfWizzard/practice-dictionary/internal/service"
-	"github.com/DwarfWizzard/practice-dictionary/internal/storage/mock"
+	"github.com/DwarfWizzard/practice-dictionary/internal/storage/sqlite"
 	"github.com/DwarfWizzard/practice-dictionary/internal/transport/rest"
 )
 
 func main() {
 	srv := new(dictionary.Server)
 
-	dictionaryStorage := mock.NewDictionaryMock()
-	dictionaryService := service.NewService(&service.ServiceConfig{
-		DictStorage: dictionaryStorage,
+	db, err := sqlite.NewSQLite3("./db/dictionary.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	storage := sqlite.NewStorage(db)
+	service := service.NewService(&service.ServiceConfig{
+		DictStorage: storage.Dict,
 	})
 	dictionaryTransport := rest.NewHandler(&rest.HandlerConfig{
-		DictService: dictionaryService.Dict,
+		DictService: service.Dict,
 	})
 
 	if err := srv.Run(":8000", dictionaryTransport.InitRoutes); err != nil {
