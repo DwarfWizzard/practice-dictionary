@@ -13,7 +13,7 @@ type HandlerConfig struct {
 	DictService DictionaryService
 }
 
-func NewHandlers(cfg *HandlerConfig) *Handler {
+func NewHandler(cfg *HandlerConfig) *Handler {
 	return &Handler{
 		DictHandler: NewDictionaryHandler(cfg.DictService),
 	}
@@ -21,5 +21,12 @@ func NewHandlers(cfg *HandlerConfig) *Handler {
 
 func (h *Handler) InitRoutes(app *fiber.App) {
 	api := app.Group("/api", logger.New())
-	api.Get("/:source/:limit/:offset", h.DictHandler.GetWords)
+	{
+		source := api.Group("/:source")
+		{
+			source.Get("/:limit/:offset", h.DictHandler.GetWords)
+			source.Get("/:word", h.DictHandler.GetTranslation)
+		}
+		
+	}
 }

@@ -16,11 +16,13 @@ func main() {
 	dictionaryService := service.NewService(&service.ServiceConfig{
 		DictStorage: dictionaryStorage,
 	})
-	dictionaryTransport := rest.NewHandlers(&rest.HandlerConfig{
+	dictionaryTransport := rest.NewHandler(&rest.HandlerConfig{
 		DictService: dictionaryService.Dict,
 	})
 
 	if err := srv.Run(":8000", dictionaryTransport.InitRoutes); err != nil {
 		log.Fatalf(err.Error())
 	}
+
+
 }

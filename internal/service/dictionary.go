@@ -3,23 +3,24 @@ package service
 import "github.com/DwarfWizzard/practice-dictionary/internal/domain"
 
 type DictionaryStorage interface {
-	GetWords(source *string, offset, limit *int) ([]domain.Word, error)
+	GetWords(source *string, limit, offset *int) ([]domain.Word, error)
+	GetTranslation(source, original *string) ([]domain.Word, error)
 }
 
 type DictionaryService struct {
-	dictStorage DictionaryStorage
+	storage DictionaryStorage
 }
 
-func NewDictionaryService(dictStorage DictionaryStorage) *DictionaryService {
+func NewDictionaryService(storage DictionaryStorage) *DictionaryService {
 	return &DictionaryService{
-		dictStorage: dictStorage,
+		storage: storage,
 	}
 }
 
-func (s *DictionaryService) GetWords(source *string, offset, limit *int) ([]domain.Word, error) {
-	words, err := s.dictStorage.GetWords(source, offset, limit)
-	if err != nil {
-		return nil, err
-	}
-	return words, nil
+func (s *DictionaryService) GetWords(source *string, limit, offset *int) ([]domain.Word, error) {
+	return s.storage.GetWords(source, limit, offset)
+}
+
+func (s *DictionaryService) GetTranslation(source, original *string) ([]domain.Word, error) {
+	return s.storage.GetTranslation(source, original)
 }

@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/DwarfWizzard/practice-dictionary/internal/domain"
@@ -9,30 +10,70 @@ import (
 )
 
 type DictionaryService interface {
-	GetWords(source *string, offset, limit *int) ([]domain.Word, error)
+	GetWords(source *string, limit, offset *int) ([]domain.Word, error)
+	GetTranslation(source, original *string) ([]domain.Word, error)
 }
 
 type DictionaryHandler struct {
-	DictService DictionaryService
+	service DictionaryService
 }
 
-func NewDictionaryHandler(dictService DictionaryService) *DictionaryHandler {
+func NewDictionaryHandler(service DictionaryService) *DictionaryHandler {
 	return &DictionaryHandler{
-		DictService: dictService,
+		service: service,
 	}
 }
 
-func (d *DictionaryHandler) GetWords(c *fiber.Ctx) error {
+func (h *DictionaryHandler) GetWords(c *fiber.Ctx) error {
 	source := c.Params("source")
-	offset, _ := strconv.Atoi(c.Params("offset"))
-	limit, _ := strconv.Atoi(c.Params("limit"))
+	limit, err1 := strconv.Atoi(c.Params("limit"))
+	offset, err2 := strconv.Atoi(c.Params("offset"))
 
-	words, err := d.DictService.GetWords(&source, &offset, &limit)
+	if err1 != nil && err2 != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(map[string]string{
+			"error": "неверные параметры",
+		})
+	}
+
+	if source != "osetian" && source != "russian" {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(map[string]string{
+			"error": "неверные параметры",
+		})
+	}
+
+	words, err := h.service.GetWords(&source, &limit, &offset)
 	if err != nil {
+		log.Println(err.Error())
 		c.Status(fiber.StatusInternalServerError)
-		return c.JSON(map[string]interface{}{
+		return c.JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
+
+	return c.JSON(words)
+}
+
+func (h *DictionaryHandler) GetTranslation(c *fiber.Ctx) error {
+	source := c.Params("source")
+	word := c.Params("word")
+	
+	if source != "osetian" && source != "russian" {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(map[string]string{
+			"error": "неверные параметры",
+		})
+	}
+	
+	words, err := h.service.GetTranslation(&source, &word)
+	if err != nil {
+		log.Println(err.Error())
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(map[string]string{
+			"error": err.Error(),
+		})		
+	}
+
 	return c.JSON(words)
 }
