@@ -9,8 +9,8 @@ import (
 )
 
 type DictionaryService interface {
-	GetWords(source *string, limit, offset *int) ([]domain.Word, error)
-	GetTranslation(source, original *string) ([]domain.Word, error)
+	GetWords(source *string, limit, offset *int) ([]domain.Dictionary, error)
+	GetTranslation(source, original *string) (domain.Dictionary, error)
 }
 
 type DictionaryHandler struct {
