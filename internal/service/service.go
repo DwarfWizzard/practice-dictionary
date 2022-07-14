@@ -5,11 +5,11 @@ type ServiceConfig struct {
 }
 
 type Service struct {
-	DictService *DictionaryService
+	Dict *DictionaryService
 }
 
 func NewService(cfg *ServiceConfig) *Service {
 	return &Service{
-		DictService: NewDictionaryService(cfg.DictStorage),
+		Dict: NewDictionaryService(cfg.DictStorage),
 	}
 }

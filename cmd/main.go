@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	dictionary "github.com/DwarfWizzard/practice-dictionary"
 	"github.com/DwarfWizzard/practice-dictionary/internal/service"
@@ -10,23 +11,28 @@ import (
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	dbPath := os.Getenv("DB_PATH")
+
 	srv := new(dictionary.Server)
 
-	db, err := sqlite.NewSQLiteConn("./db/dictionary.db")
+	db, err := sqlite.NewSQLiteConn(dbPath+"dictionary.db")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println(dbPath+"dictionary.db")
 
 	storage := sqlite.NewStorage(db)
 	service := service.NewService(&service.ServiceConfig{
 		DictStorage: storage.Dict,
 	})
-	transport := rest.NewHandler(&rest.HandlerConfig{
-		DictService: service.DictService,
+	dictionaryTransport := rest.NewHandler(&rest.HandlerConfig{
+		DictService: service.Dict,
 	})
 
-	if err := srv.Run(":8000", transport.InitRoutes); err != nil {
-		log.Fatal(err.Error())
+	if err := srv.Run(":"+port, dictionaryTransport.InitRoutes); err != nil {
+		log.Fatalf(err.Error())
 	}
 
 

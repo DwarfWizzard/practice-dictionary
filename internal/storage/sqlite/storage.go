@@ -8,6 +8,6 @@ type Storage struct {
 
 func NewStorage(db *sqlx.DB) *Storage {
 	return &Storage{
-		Dict: NewDictionaryStorage(db),
+		Dict : NewDictionaryStorage(db),
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/DwarfWizzard/practice-dictionary/internal/domain"
+
 	"github.com/gofiber/fiber/v2"
 )
 

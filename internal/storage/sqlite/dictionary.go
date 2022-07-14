@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/DwarfWizzard/practice-dictionary/internal/domain"
 	"github.com/jmoiron/sqlx"
@@ -26,8 +27,8 @@ func (s *DictionaryStorage) GetWords(source *string, offset, limit *int) ([]doma
 	var dictionary []domain.Dictionary
 
 	var words []word
-	
 	query := fmt.Sprintf("SELECT id, word FROM %s_words LIMIT %d OFFSET %d", *source, *limit, *offset)
+	
 	err := s.db.Select(&words, query)
 	if err != nil {
 		return dictionary, err
@@ -62,5 +63,37 @@ func (s *DictionaryStorage) GetWords(source *string, offset, limit *int) ([]doma
 
 func (s *DictionaryStorage) GetTranslation(source, original *string) (domain.Dictionary, error) {
 	var dictionary domain.Dictionary
+
+	decoded, err := url.QueryUnescape(*original)
+	if err != nil {
+		return dictionary, err
+	}
+
+	var query string
+	switch *source {
+	case "osetian":
+		query = fmt.Sprintf("SELECT ow.id AS id, rw.word AS translation FROM osetian_russian AS os_ru INNER JOIN russian_words AS rw ON rw.id=os_ru.translation_id INNER JOIN osetian_words AS ow ON ow.id=os_ru.original_id WHERE ow.word = \"%s\"", decoded)
+	case "russian":
+		query = fmt.Sprintf("SELECT rw.id AS id, ow.word AS translation  FROM russian_osetian AS ru_os INNER JOIN russian_words AS rw ON rw.id=ru_os.original_id INNER JOIN osetian_words AS ow ON ow.id=ru_os.translation_id WHERE rw.word = \"%s\"", decoded)
+	}
+	
+	dictionary.Original = decoded
+	rows, err := s.db.Queryx(query)
+	if err != nil {
+		return dictionary, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var word string
+		var id int
+		err := rows.Scan(&id, &word)
+		if err != nil {
+			return dictionary, err
+		}
+
+		dictionary.Id = id
+		dictionary.Translation = append(dictionary.Translation, word)
+	}
+
 	return dictionary, nil
 }
