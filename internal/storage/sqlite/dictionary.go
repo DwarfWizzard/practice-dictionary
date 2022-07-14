@@ -23,12 +23,12 @@ type word struct {
 	Word string `db:"word"`
 }
 
-func (s *DictionaryStorage) GetWords(source *string, offset, limit *int) ([]domain.Dictionary, error) {
+func (s *DictionaryStorage) GetWords(source *string, limit, offset*int) ([]domain.Dictionary, error) {
 	var dictionary []domain.Dictionary
 
 	var words []word
 	query := fmt.Sprintf("SELECT id, word FROM %s_words LIMIT %d OFFSET %d", *source, *limit, *offset)
-	
+
 	err := s.db.Select(&words, query)
 	if err != nil {
 		return dictionary, err
